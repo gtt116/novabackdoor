@@ -61,16 +61,19 @@ def loopwait():
     while True:
         eventlet.sleep(1)
 
+def main():
+    conn = rpc.create_connection(new=True)
 
-conn = rpc.create_connection(new=True)
+    topics = ['compute', 'compute.*',
+            'network', 'network.*',
+            'scheduler']
+    for topic in topics:
+        conn.declare_topic_consumer(topic=topic, callback=MsgHandler(topic),
+                                    queue_name='%s_backdoor' % topic)
 
-topics = ['compute', 'compute.*',
-          'network', 'network.*',
-          'scheduler']
-for topic in topics:
-    conn.declare_topic_consumer(topic=topic, callback=MsgHandler(topic),
-                                queue_name='%s_backdoor' % topic)
+    conn.consume_in_thread()
+    eventlet.spawn(loopwait).wait()
 
-conn.consume_in_thread()
-eventlet.spawn(loopwait).wait()
 
+if __name__ == '__main__':
+    main()
