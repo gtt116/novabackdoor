@@ -33,11 +33,20 @@ class MsgHandler(object):
         u'_context_user_id',
         u'_context_user_name',
         u'_context_remote_address']
+
+    The notifications Message Example:
+
+        {'message_id': str(uuid.uuid4()),
+        'publisher_id': 'compute.host1',
+        'timestamp': timeutils.utcnow(),
+        'priority': 'WARN',
+        'event_type': 'compute.create_instance',
+        'payload': {'instance_id': 12, ... }}
     '''
 
-    def __init__(self, name):
+    def __init__(self, name, notify=False):
         self.name = name
-
+        self.notify = notify
 
     def __call__(self, message):
         def _print(key):
@@ -45,16 +54,30 @@ class MsgHandler(object):
             print '%s: %s' % (key, value)
 
         print self.name.center(50)
-        try:
-            _print('method')
-            _print('args')
-            _print('_context_request_id')
-            _print('_context_remote_address')
-            _print('_context_timestamp')
-        except Exception:
-            pass
-        finally:
-            print '-'*50
+        if self.notify:
+            try:
+                _print('message_id')
+                _print('publisher_id')
+                _print('event_type')
+                _print('payload')
+                _print('_context_request_id')
+                _print('_context_remote_address')
+                _print('timestamp')
+            except Exception:
+                pass
+            finally:
+                print '-'*50
+        else:
+            try:
+                _print('method')
+                _print('args')
+                _print('_context_request_id')
+                _print('_context_remote_address')
+                _print('_context_timestamp')
+            except Exception:
+                pass
+            finally:
+                print '-'*50
 
 
 def loopwait():
@@ -65,12 +88,15 @@ def main():
     conn = rpc.create_connection(new=True)
 
     topics = ['compute', 'compute.*',
-            'network', 'network.*',
-            'scheduler']
+              'network', 'network.*',
+              'scheduler']
     for topic in topics:
         conn.declare_topic_consumer(topic=topic, callback=MsgHandler(topic),
                                     queue_name='%s_backdoor' % topic)
 
+    topic = 'notifications.*'
+    conn.declare_topic_consumer(topic=topic, callback=MsgHandler(topic, True),
+                                queue_name='%s_backdoor' % topic)
     conn.consume_in_thread()
     eventlet.spawn(loopwait).wait()
 
