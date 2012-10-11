@@ -6,8 +6,9 @@ import eventlet
 try:
     from nova.openstack.common import rpc
 except Exception:
-    print 'The script is only for folsom openstack'
-    exit()
+    from nova import rpc
+    import consumer
+    consumer.patch_topic_consumer()
 
 logfile = 'log.txt'
 
