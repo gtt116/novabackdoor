@@ -1,11 +1,13 @@
+#!/usr/bin/python
+# IMPORTANT: The script is only used for folsom openstack
 import pprint
 import eventlet
 
 try:
     from nova.openstack.common import rpc
 except Exception:
-    # Esses version, rpc is not extract into openstack.common
-    from nova import rpc
+    print 'The script is only for folsom openstack'
+    exit()
 
 logfile = 'log.txt'
 
