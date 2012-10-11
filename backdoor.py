@@ -1,7 +1,11 @@
 import pprint
 import eventlet
 
-from nova.openstack.common import rpc
+try:
+    from nova.openstack.common import rpc
+except Exception:
+    # Esses version, rpc is not extract into openstack.common
+    from nova import rpc
 
 logfile = 'log.txt'
 
