@@ -6,7 +6,7 @@ It listen on rabbitmq to receive msg from compute, network, scheduler.
 Also It can receive notification from other compoment.
 
 
-NOTE
+Note
 ========
 
 This script is written under folsom nova.
