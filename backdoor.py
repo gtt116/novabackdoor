@@ -7,16 +7,8 @@ try:
     from nova.openstack.common import rpc
 except Exception:
     from nova import rpc
-    import consumer
-    consumer.patch_topic_consumer()
-
-logfile = 'log.txt'
-
-def print_msg(message):
-#    pprint.pprint(message)
-    pprint.pprint(message.keys())
-    pprint.pprint(message['method'])
-    print '-'*50
+    import patcher
+    patcher.patch_topic_consumer()
 
 
 class MsgHandler(object):
@@ -58,7 +50,7 @@ class MsgHandler(object):
     def __call__(self, message):
         def _print(key):
             value = message.get(key, None)
-            print '%s: %s' % (key, value)
+            print '%s: %s' % (key, pprint.pformat(value))
 
         print self.name.center(50)
         if self.notify:
