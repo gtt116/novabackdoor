@@ -1,11 +1,13 @@
 import kombu
+import functools
 
-from nova import rpc
+from nova import flags
+from nova.rpc import impl_kombu
 
-class TopicConsumer(rpc.ConsumerBase):
+class TopicConsumer(impl_kombu.ConsumerBase):
     """Consumer class for 'topic'"""
 
-    def __init__(self, conf, channel, topic, callback, tag, name=None,
+    def __init__(self, channel, topic, callback, tag, conf, name=None,
                  **kwargs):
         """Init a 'topic' queue.
 
@@ -36,5 +38,11 @@ class TopicConsumer(rpc.ConsumerBase):
                                             routing_key=topic,
                                             **options)
 
+def _declare_topic_consumer(self, topic, callback=None, queue_name=None):
+    self.declare_consumer(functools.partial(TopicConsumer,
+                                            name=queue_name, conf=flags.FLAGS),
+                          topic, callback)
+
 def patch_topic_consumer():
-    nova.rpc.impl_kombu.TopicConsumer = TopicConsumer
+    impl_kombu.TopicConsumer = TopicConsumer
+    impl_kombu.Connection.declare_topic_consumer = _declare_topic_consumer

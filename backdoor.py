@@ -5,7 +5,7 @@ import eventlet
 
 try:
     from nova.openstack.common import rpc
-except Exception:
+except ImportError:
     from nova import rpc
     import patcher
     patcher.patch_topic_consumer()
